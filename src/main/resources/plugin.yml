@@ -1,0 +1,14 @@
+name: BistroDeathProtect
+version: '${project.version}'
+main: cn.syand.bistrodeathprotect.BistroDeathProtect
+api-version: '1.20'
+author: Aug_Sakura
+description: DeathProtect for Bistro Server
+commands:
+  bistrodeathprotect:
+    description: DeathProtect for Bistro Server
+    usage: /bistrodeathprotect
+    aliases: [bdp]
+    permission: bistrodeathprotect.use
+    permission-message: You don't have permission to use this command
+    executor: cn.syand.bistrodeathprotect.BistroDeathProtectCommand

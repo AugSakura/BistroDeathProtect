@@ -1,0 +1,30 @@
+# 整体设置
+setting:
+  # 死亡保护时间
+  time: 5
+  # 死亡时音效
+  sound: 'ENTITY_PLAYER_DEATH'
+
+# 插件世界黑名单
+blackWorld:
+  enable: false
+  worlds:
+    - 'world_nether'
+    - 'world_the_end'
+
+# 小黑屋设置
+prison:
+  enable: false
+  # 累计死亡多少次后进入小黑屋
+  death: 3
+  # 小黑屋坐标
+  location:
+    world: 'world'
+    x: 0
+    y: 0
+    z: 0
+  # 小黑屋倒计时时间
+  time: 30
+  # 小黑屋倒计时结束后执行的命令
+  commands:
+    - 'spawns teleport default %player%'
