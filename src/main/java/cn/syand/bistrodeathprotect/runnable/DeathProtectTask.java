@@ -3,12 +3,10 @@ package cn.syand.bistrodeathprotect.runnable;
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
