@@ -132,10 +132,16 @@ public class PrisonTask extends BukkitRunnable {
     public void cancelRun() {
         // 执行小黑屋结束后的命令
         Server server = this.plugin.getServer();
-        commands.forEach(command -> server.dispatchCommand(
-                server.getConsoleSender(),
-                PlaceholderAPI.setPlaceholders(this.player, command)
-        ));
+        try {
+            if (!commands.isEmpty()) {
+                commands.forEach(command -> server.dispatchCommand(
+                        server.getConsoleSender(),
+                        PlaceholderAPI.setPlaceholders(this.player, command)
+                ));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("小黑屋结束后的命令执行失败", e);
+        }
 
         // 将玩家添加到小黑屋列表中
         plugin.removePrisonList(player.getName());
