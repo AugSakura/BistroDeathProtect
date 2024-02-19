@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- 项目打包目录 -->
-        <project.packageDir>C:\Users\24313\Desktop\BistroDeathProtect</project.packageDir>
+        <project.packageDir>E:\服务器\Test Server\plugins</project.packageDir>
     </properties>
 
     <build>

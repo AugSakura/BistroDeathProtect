@@ -1,4 +1,13 @@
-message:
-  delay:
-    title: '&f死亡保护倒计时 &c&l@s@ &f秒'
-    subtitle: '&3请飞到安全的地方!'
+prefix: '&7[ &6死亡保护 &7] >>> &f'
+
+death:
+  title: '&f死亡保护倒计时 &c&l%death_time% &f秒'
+  subtitle: '&3请飞到安全的地方!'
+
+prison:
+  title: '&3你已经进入小黑屋啦!'
+  subtitle: '&f小黑屋剩余时间 &c&l%prison_time% &f秒'
+  prohibition: '&f当前不允许执行这些动作哦!'
+
+reload:
+  success: '插件配置已重载'

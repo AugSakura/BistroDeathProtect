@@ -1,16 +1,24 @@
 # 整体设置
 setting:
   # 死亡保护时间
-  time: 5
+  time: 3
   # 死亡时音效
   sound: 'ENTITY_PLAYER_DEATH'
+  # 语言文件
+  language: 'zh_CN'
+
+# 死亡惩罚
+deathPenalty:
+  # 是否开启死亡惩罚
+  enable: false
+  # 扣除等级 百分比
+  level: 0.1
 
 # 插件世界黑名单
 blackWorld:
-  enable: false
+  enable: true
   worlds:
     - 'world_nether'
-    - 'world_the_end'
 
 # 小黑屋设置
 prison:
@@ -27,4 +35,4 @@ prison:
   time: 30
   # 小黑屋倒计时结束后执行的命令
   commands:
-    - 'spawns teleport default %player%'
+    - 'spawns teleport default %player_name%'
