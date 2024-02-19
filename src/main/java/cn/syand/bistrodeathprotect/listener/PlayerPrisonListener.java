@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -32,6 +33,27 @@ public class PlayerPrisonListener implements Listener {
 
     public PlayerPrisonListener(BistroDeathProtect bistroDeathProtect) {
         this.plugin = bistroDeathProtect;
+    }
+
+    /**
+     * 玩家受伤监听
+     *
+     * @param entityDamageEvent 玩家受伤事件
+     */
+    @EventHandler
+    public void onPlayerDamage(EntityDamageEvent entityDamageEvent) {
+        // 判断死亡实体是否为玩家
+        if (null == entityDamageEvent
+                || !(entityDamageEvent.getEntity() instanceof Player)) {
+            return;
+        }
+
+        // 清除玩家着火等状态
+        Player player = (Player) entityDamageEvent.getEntity();
+        player.setFireTicks(0);
+
+        // 取消伤害
+        entityDamageEvent.setCancelled(true);
     }
 
     /**

@@ -23,6 +23,11 @@ public enum CommandEnums {
     RELOAD("reload"),
 
     /**
+     * 设置小黑屋地点
+     */
+    SET_PRISON("setPrison"),
+
+    /**
      * 未知
      */
     UNKNOWN("unknown");
@@ -51,8 +56,20 @@ public enum CommandEnums {
     static {
         // 添加枚举到map集合
         for (CommandEnums command : CommandEnums.values()) {
+            // 不添加 UNKNOWN
+            if (command.command().toLowerCase().equals(UNKNOWN.command)) {
+                continue;
+            }
+
             ENUM_MAP.put(command.command().toLowerCase(), command);
         }
+    }
+
+    /**
+     * 获取MAP集合
+     */
+    public static Map<String, CommandEnums> getEnumMap() {
+        return ENUM_MAP;
     }
 
     /**

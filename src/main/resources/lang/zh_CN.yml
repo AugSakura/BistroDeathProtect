@@ -8,6 +8,7 @@ prison:
   title: '&3你已经进入小黑屋啦!'
   subtitle: '&f小黑屋剩余时间 &c&l%prison_time% &f秒'
   prohibition: '&f当前不允许执行这些动作哦!'
+  setSuccess: '&f小黑屋设置为当前所在位置成功!'
 
 reload:
   success: '插件配置已重载'

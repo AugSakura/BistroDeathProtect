@@ -108,7 +108,7 @@ public class PlayerDeathListener implements Listener {
      * @param config 配置
      * @return 是否进入小黑屋
      */
-    private boolean enterBlackRoom(Player player, FileConfiguration config) {
+    public boolean enterBlackRoom(Player player, FileConfiguration config) {
         // 判断是否需要进入小黑屋
         if (!this.isEnterBlackRoom(player, config)) {
             return Boolean.FALSE;

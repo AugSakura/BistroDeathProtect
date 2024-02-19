@@ -9,6 +9,6 @@ prefix: '[BistroDeathProtect] '
 commands:
   bistrodeathprotect:
     description: DeathProtect for Bistro Server
-    usage: /bistrodeathprotect
+    usage: /bistrodeathprotect <command>
     aliases: [ bdp ]
     permission: bistrodeathprotect.reload

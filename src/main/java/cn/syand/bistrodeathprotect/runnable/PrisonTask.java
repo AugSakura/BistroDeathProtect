@@ -60,6 +60,9 @@ public class PrisonTask extends BukkitRunnable {
         this.playerPrisonListener = new PlayerPrisonListener(plugin);
         Bukkit.getPluginManager().registerEvents(playerPrisonListener, plugin);
 
+        // 将玩家添加到小黑屋列表中
+        plugin.addPrisonList(player.getName());
+
         // 获取死亡保护时间
         this.time = BistroDeathProtect.INSTANCE.getConfig().getInt("prison.time", 30);
     }
@@ -133,6 +136,9 @@ public class PrisonTask extends BukkitRunnable {
                 server.getConsoleSender(),
                 PlaceholderAPI.setPlaceholders(this.player, command)
         ));
+
+        // 将玩家添加到小黑屋列表中
+        plugin.removePrisonList(player.getName());
 
         // 关闭玩家小黑屋监听
         HandlerList.unregisterAll(playerPrisonListener);
