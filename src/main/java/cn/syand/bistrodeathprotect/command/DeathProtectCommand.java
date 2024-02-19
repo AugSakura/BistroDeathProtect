@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,11 +51,6 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        // 获取语言配置
-        YamlConfiguration languageConfig = plugin.getLanguageConfig();
-        // 获取前缀
-        String prefix = languageConfig.getString("prefix");
-
         if (args.length == 1) {
             // 获取二级命令
             CommandEnums commandEnums = CommandEnums.getByCommand(args[0]);
@@ -62,11 +58,11 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
             switch (commandEnums) {
                 case RELOAD:
                     // 重载插件
-                    this.reloadConfig(languageConfig, prefix, sender);
+                    this.reloadConfig(sender);
                     break;
                 case SET_PRISON:
                     // 设置小黑屋
-                    this.setPrison(languageConfig, prefix, sender);
+                    this.setPrison(sender);
                     break;
                 default:
                     break;
@@ -81,11 +77,17 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
     /**
      * 重载配置
      *
-     * @param languageConfig 语言配置
-     * @param prefix         前缀
-     * @param sender         命令发送者
+     * @param sender 命令发送者
      */
-    private void reloadConfig(YamlConfiguration languageConfig, String prefix, CommandSender sender) {
+    private void reloadConfig(CommandSender sender) {
+        // 清空语言文件
+        plugin.clearLanguageFile();
+
+        // 获取语言配置
+        YamlConfiguration languageConfig = plugin.getLanguageConfig();
+        // 获取前缀
+        String prefix = languageConfig.getString("prefix");
+
         // 重载配置
         plugin.reloadConfig();
 
@@ -98,11 +100,14 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
     /**
      * 设置小黑屋
      *
-     * @param languageConfig 语言配置
-     * @param prefix         前缀
-     * @param sender         命令发送者
+     * @param sender 命令发送者
      */
-    private void setPrison(YamlConfiguration languageConfig, String prefix, CommandSender sender) {
+    private void setPrison(CommandSender sender) {
+        // 获取语言配置
+        YamlConfiguration languageConfig = plugin.getLanguageConfig();
+        // 获取前缀
+        String prefix = languageConfig.getString("prefix");
+
         // 获取发送者的信息
         Player player = sender.getServer().getPlayer(sender.getName());
         if (Objects.isNull(player)) {
@@ -138,7 +143,6 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
             // 返回tab补全
             return new ArrayList<>(CommandEnums.getEnumMap().keySet());
         }
-
-        return null;
+        return Collections.emptyList();
     }
 }

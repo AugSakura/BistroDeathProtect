@@ -2,15 +2,12 @@ package cn.syand.bistrodeathprotect.runnable;
 
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
-import cn.syand.bistrodeathprotect.listener.PlayerPrisonListener;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -46,22 +43,16 @@ public class PrisonTask extends BukkitRunnable {
      */
     private final List<String> commands;
 
-    /**
-     * 玩家小黑屋监听
-     */
-    private final PlayerPrisonListener playerPrisonListener;
-
     public PrisonTask(BistroDeathProtect plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
         this.commands = plugin.getConfig().getStringList("prison.commands");
 
-        // 开启玩家小黑屋监听
-        this.playerPrisonListener = new PlayerPrisonListener(plugin);
-        Bukkit.getPluginManager().registerEvents(playerPrisonListener, plugin);
-
         // 将玩家添加到小黑屋列表中
         plugin.addPrisonList(player.getName());
+
+        // 设置玩家游戏模式 冒险模式
+        player.setGameMode(GameMode.ADVENTURE);
 
         // 获取死亡保护时间
         this.time = BistroDeathProtect.INSTANCE.getConfig().getInt("prison.time", 30);
@@ -82,8 +73,6 @@ public class PrisonTask extends BukkitRunnable {
     public void run() {
         // 判断玩家是否在线
         if (this.player == null || !this.player.isOnline()) {
-            // 关闭玩家小黑屋监听
-            HandlerList.unregisterAll(playerPrisonListener);
             this.cancel();
             return;
         }
@@ -145,9 +134,6 @@ public class PrisonTask extends BukkitRunnable {
 
         // 将玩家添加到小黑屋列表中
         plugin.removePrisonList(player.getName());
-
-        // 关闭玩家小黑屋监听
-        HandlerList.unregisterAll(playerPrisonListener);
 
         // 取消失明效果
         this.player.removePotionEffect(PotionEffectType.BLINDNESS);

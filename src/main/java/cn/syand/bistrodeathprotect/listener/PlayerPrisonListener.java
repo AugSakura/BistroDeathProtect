@@ -7,13 +7,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,40 +34,19 @@ public class PlayerPrisonListener implements Listener {
     }
 
     /**
-     * 玩家受伤监听
+     * 判断是否是小黑屋玩家
      *
-     * @param entityDamageEvent 玩家受伤事件
+     * @param player 玩家
+     * @return 是否是当前玩家
      */
-    @EventHandler
-    public void onPlayerDamage(EntityDamageEvent entityDamageEvent) {
-        // 判断死亡实体是否为玩家
-        if (null == entityDamageEvent
-                || !(entityDamageEvent.getEntity() instanceof Player)) {
-            return;
+    private boolean isCurrentPlayer(Player player) {
+        // 获取小黑屋玩家列表
+        List<String> prisonList = plugin.getPrisonList();
+        if (prisonList.isEmpty()) {
+            return Boolean.TRUE;
         }
 
-        // 清除玩家着火等状态
-        Player player = (Player) entityDamageEvent.getEntity();
-        player.setFireTicks(0);
-
-        // 取消伤害
-        entityDamageEvent.setCancelled(true);
-    }
-
-    /**
-     * 玩家破坏监听
-     *
-     * @param blockBreakEvent 玩家破坏事件
-     */
-    @EventHandler
-    public void onPlayerDestroy(BlockBreakEvent blockBreakEvent) {
-        // 判断是否为玩家
-        if (Objects.isNull(blockBreakEvent)) {
-            return;
-        }
-
-        // 取消破坏
-        blockBreakEvent.setCancelled(true);
+        return !prisonList.contains(player.getName());
     }
 
     /**
@@ -82,6 +59,11 @@ public class PlayerPrisonListener implements Listener {
         // 判断是否为玩家
         if (Objects.isNull(entityPlaceEvent)
                 || !(entityPlaceEvent.getEntity() instanceof Player)) {
+            return;
+        }
+
+        // 判断是否为当前玩家
+        if (this.isCurrentPlayer((Player) entityPlaceEvent.getEntity())) {
             return;
         }
 
@@ -101,22 +83,13 @@ public class PlayerPrisonListener implements Listener {
             return;
         }
 
-        // 取消使用物品
-        playerInteractEvent.setCancelled(true);
-    }
-
-    /**
-     * 玩家丢弃物品监听
-     */
-    @EventHandler
-    public void onPlayerDropItem(PlayerDropItemEvent playerDropItemEvent) {
-        // 校验参数
-        if (Objects.isNull(playerDropItemEvent)) {
+        // 判断是否为当前玩家
+        if (this.isCurrentPlayer(playerInteractEvent.getPlayer())) {
             return;
         }
 
-        // 取消丢弃物品
-        playerDropItemEvent.setCancelled(true);
+        // 取消使用物品
+        playerInteractEvent.setCancelled(true);
     }
 
     /**
@@ -128,6 +101,11 @@ public class PlayerPrisonListener implements Listener {
     public void onPlayerChatCommand(PlayerCommandPreprocessEvent playerCommandPreprocessEvent) {
         // 校验参数
         if (Objects.isNull(playerCommandPreprocessEvent)) {
+            return;
+        }
+
+        // 判断是否为当前玩家
+        if (this.isCurrentPlayer(playerCommandPreprocessEvent.getPlayer())) {
             return;
         }
 

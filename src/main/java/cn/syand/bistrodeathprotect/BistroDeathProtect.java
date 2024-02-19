@@ -4,6 +4,7 @@ import cn.syand.bistrodeathprotect.command.DeathProtectCommand;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
 import cn.syand.bistrodeathprotect.listener.PlayerDeathListener;
 import cn.syand.bistrodeathprotect.listener.PlayerJoinListener;
+import cn.syand.bistrodeathprotect.listener.PlayerPrisonListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,6 +29,16 @@ public final class BistroDeathProtect extends JavaPlugin {
      * 插件实例 单例
      */
     public static BistroDeathProtect INSTANCE;
+
+    /**
+     * 语言文件
+     */
+    public static File LANGUAGE_FILE;
+
+    /**
+     * 小黑屋列表文件
+     */
+    public static File PRISONLIST_FILE;
 
     public BistroDeathProtect() {
         INSTANCE = this;
@@ -67,6 +78,9 @@ public final class BistroDeathProtect extends JavaPlugin {
         // 事件监听器: 玩家加入游戏
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, playerDeathListener), this);
 
+        // 事件监听器: 小黑屋
+        this.getServer().getPluginManager().registerEvents(new PlayerPrisonListener(this), this);
+
         // 打印插件信息
         Bukkit.getConsoleSender().sendMessage("§aBistroDeathProtect §f插件已加载");
         Bukkit.getConsoleSender().sendMessage("§aBistroDeathProtect §f插件由 §bAug_Sakura §f开发, QQ: §b1048064671");
@@ -88,8 +102,17 @@ public final class BistroDeathProtect extends JavaPlugin {
         String language = config.getString("setting.language");
 
         // 语言文件 和 语言资源
-        File languageFile = new File(this.getDataFolder(), DeathProtectConstants.LANGUAGE_PATH + language + DeathProtectConstants.FILE_SUFFIX);
-        return YamlConfiguration.loadConfiguration(languageFile);
+        if (Objects.isNull(LANGUAGE_FILE)) {
+            LANGUAGE_FILE = new File(this.getDataFolder(), DeathProtectConstants.LANGUAGE_PATH + language + DeathProtectConstants.FILE_SUFFIX);
+        }
+        return YamlConfiguration.loadConfiguration(LANGUAGE_FILE);
+    }
+
+    /**
+     * 清空语言文件
+     */
+    public void clearLanguageFile() {
+        LANGUAGE_FILE = null;
     }
 
     /**
@@ -99,8 +122,10 @@ public final class BistroDeathProtect extends JavaPlugin {
      */
     public List<String> getPrisonList() {
         // 获取配置
-        File prisonListFile = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(prisonListFile);
+        if (Objects.isNull(PRISONLIST_FILE)) {
+            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
+        }
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
         return configuration.getStringList("player");
     }
 
@@ -111,8 +136,10 @@ public final class BistroDeathProtect extends JavaPlugin {
      */
     public void addPrisonList(String name) {
         // 获取配置
-        File prisonListFile = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(prisonListFile);
+        if (Objects.isNull(PRISONLIST_FILE)) {
+            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
+        }
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
 
         // 获取玩家列表
         List<String> player = configuration.getStringList("player");
@@ -127,7 +154,10 @@ public final class BistroDeathProtect extends JavaPlugin {
         // 保存
         configuration.set("player", player);
         try {
-            configuration.save(prisonListFile);
+            configuration.save(PRISONLIST_FILE);
+
+            // 清空缓存
+            PRISONLIST_FILE = null;
         } catch (Exception e) {
             throw new RuntimeException("保存小黑屋列表失败");
         }
@@ -140,8 +170,10 @@ public final class BistroDeathProtect extends JavaPlugin {
      */
     public void removePrisonList(String name) {
         // 获取配置
-        File prisonListFile = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(prisonListFile);
+        if (Objects.isNull(PRISONLIST_FILE)) {
+            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
+        }
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
 
         // 获取玩家列表
         List<String> player = configuration.getStringList("player");
@@ -156,7 +188,10 @@ public final class BistroDeathProtect extends JavaPlugin {
         // 保存
         configuration.set("player", player);
         try {
-            configuration.save(prisonListFile);
+            configuration.save(PRISONLIST_FILE);
+
+            // 清空缓存
+            PRISONLIST_FILE = null;
         } catch (Exception e) {
             throw new RuntimeException("保存小黑屋列表失败");
         }
