@@ -185,14 +185,12 @@ public class PlayerDeathListener implements Listener {
 
         // 获取玩家当前经验
         double playerExperience = player.getLevel();
-        Bukkit.getConsoleSender().sendMessage("playerExperience: " + playerExperience);
         if (playerExperience <= 0) {
             return;
         }
 
         // 扣除经验 百分比
         double deductExperience = playerExperience * level;
-        Bukkit.getConsoleSender().sendMessage("deductExperience: " + deductExperience);
         player.setLevel((int) (playerExperience - deductExperience));
     }
 
