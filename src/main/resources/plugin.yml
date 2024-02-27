@@ -8,7 +8,25 @@ prefix: '[BistroDeathProtect] '
 
 commands:
   bistrodeathprotect:
-    description: DeathProtect for Bistro Server
-    usage: /bistrodeathprotect <command>
-    aliases: [ bdp ]
-    permission: bistrodeathprotect.reload
+    description: 主命令
+    usage: /bistrodeathprotect <command> [args...]
+    permission: bistro.death.command.use
+    aliases:
+      - bdp
+
+permissions:
+  bistro.death.*:
+    default: op
+    children:
+      bistro.death.command.*:
+        default: op
+        children:
+          bistro.death.command.use:
+            description: 允许使用 /bistrodeathprotect
+            default: true
+          bistro.death.command.reload:
+            description: 允许使用 /bistrodeathprotect reload
+            default: op
+          bistro.death.command.setPrison:
+            description: 允许使用 /bistrodeathprotect setprison
+            default: op

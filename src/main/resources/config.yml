@@ -8,14 +8,14 @@ setting:
   language: 'zh_CN'
 
 # 死亡惩罚
-deathPenalty:
+death-penalty:
   # 是否开启死亡惩罚
   enable: false
   # 扣除等级 百分比
   level: 0.1
 
-# 插件世界黑名单
-blackWorld:
+# 世界黑名单
+black-world:
   enable: true
   worlds:
     - 'world_nether'

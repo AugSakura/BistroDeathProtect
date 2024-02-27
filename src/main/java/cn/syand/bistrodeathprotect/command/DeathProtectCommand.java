@@ -1,17 +1,18 @@
 package cn.syand.bistrodeathprotect.command;
 
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
+import cn.syand.bistrodeathprotect.config.LanguageInfo;
+import cn.syand.bistrodeathprotect.config.PrisonList;
+import cn.syand.bistrodeathprotect.config.ProtectConfig;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
 import cn.syand.bistrodeathprotect.enums.CommandEnums;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import cn.syand.bistrodeathprotect.utils.CommonUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,21 +81,28 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
      * @param sender 命令发送者
      */
     private void reloadConfig(CommandSender sender) {
-        // 清空语言文件
-        plugin.clearLanguageFile();
+        // 校验参数
+        if (Objects.isNull(sender)) {
+            return;
+        }
 
-        // 获取语言配置
-        YamlConfiguration languageConfig = plugin.getLanguageConfig();
-        // 获取前缀
-        String prefix = languageConfig.getString("prefix");
+        // 校验权限
+        if (!sender.hasPermission(CommandEnums.RELOAD.permission())) {
+            sender.sendMessage(CommonUtils.translateColor(LanguageInfo.PREFIX + LanguageInfo.NO_PERMISSION));
+            return;
+        }
+
+        // 重载语言配置
+        LanguageInfo.reloadConfig();
 
         // 重载配置
-        plugin.reloadConfig();
+        ProtectConfig.reloadConfig();
+
+        // 重载小黑屋列表
+        PrisonList.reloadConfig();
 
         // 打印重载成功
-        String info = ChatColor.translateAlternateColorCodes('&', prefix + languageConfig.get("reload.success"));
-        sender.sendMessage(info);
-        Bukkit.getConsoleSender().sendMessage(info);
+        sender.sendMessage(CommonUtils.translateColor(LanguageInfo.PREFIX + LanguageInfo.Reload.SUCCESS));
     }
 
     /**
@@ -103,10 +111,16 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
      * @param sender 命令发送者
      */
     private void setPrison(CommandSender sender) {
-        // 获取语言配置
-        YamlConfiguration languageConfig = plugin.getLanguageConfig();
-        // 获取前缀
-        String prefix = languageConfig.getString("prefix");
+        // 校验参数
+        if (Objects.isNull(sender)) {
+            return;
+        }
+
+        // 校验权限
+        if (!sender.hasPermission(CommandEnums.RELOAD.permission())) {
+            sender.sendMessage(CommonUtils.translateColor(LanguageInfo.PREFIX + LanguageInfo.NO_PERMISSION));
+            return;
+        }
 
         // 获取发送者的信息
         Player player = sender.getServer().getPlayer(sender.getName());
@@ -127,12 +141,11 @@ public class DeathProtectCommand implements CommandExecutor, TabExecutor {
         plugin.getConfig().set("prison.location.z", location.getZ());
         plugin.getConfig().set("prison.location.world", worldName);
 
-        // 刷新配置
+        // 保存配置
         plugin.saveConfig();
 
         // 打印设置成功
-        String info = ChatColor.translateAlternateColorCodes('&', prefix + languageConfig.get("prison.setSuccess"));
-        sender.sendMessage(info);
+        sender.sendMessage(CommonUtils.translateColor(LanguageInfo.PREFIX + LanguageInfo.Prison.SET_SUCCESS));
     }
 
     @Nullable

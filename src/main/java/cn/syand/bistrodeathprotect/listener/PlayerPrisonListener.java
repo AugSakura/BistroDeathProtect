@@ -1,9 +1,9 @@
 package cn.syand.bistrodeathprotect.listener;
 
-import cn.syand.bistrodeathprotect.BistroDeathProtect;
+import cn.syand.bistrodeathprotect.config.LanguageInfo;
+import cn.syand.bistrodeathprotect.config.PrisonList;
+import cn.syand.bistrodeathprotect.utils.CommonUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,7 +11,6 @@ import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,28 +24,18 @@ import java.util.Objects;
 public class PlayerPrisonListener implements Listener {
 
     /**
-     * 死亡保护 插件实例
-     */
-    private final BistroDeathProtect plugin;
-
-    public PlayerPrisonListener(BistroDeathProtect bistroDeathProtect) {
-        this.plugin = bistroDeathProtect;
-    }
-
-    /**
      * 判断是否是小黑屋玩家
      *
      * @param player 玩家
      * @return 是否是当前玩家
      */
     private boolean isCurrentPlayer(Player player) {
-        // 获取小黑屋玩家列表
-        List<String> prisonList = plugin.getPrisonList();
-        if (prisonList.isEmpty()) {
+        // 判断小黑屋列表是否为空
+        if (PrisonList.PRISON_LIST.isEmpty()) {
             return Boolean.TRUE;
         }
 
-        return !prisonList.contains(player.getName());
+        return !PrisonList.PRISON_LIST.contains(player.getName());
     }
 
     /**
@@ -115,21 +104,12 @@ public class PlayerPrisonListener implements Listener {
         // 获取当前玩家信息
         Player player = playerCommandPreprocessEvent.getPlayer();
 
-        // 获取语言配置
-        YamlConfiguration languageConfig = this.plugin.getLanguageConfig();
-        // 获取前缀
-        String prefix = languageConfig.getString("prefix");
-        // 获取发送的数据
-        String prohibition = languageConfig.getString("prison.prohibition");
-        if (Objects.isNull(prefix) || Objects.isNull(prohibition)) {
-            throw new RuntimeException("prefix 或 prohibition 设置为空");
-        }
-
         // 替换papi占位符
-        prohibition = PlaceholderAPI.setPlaceholders(player, prohibition);
+        String prohibition = LanguageInfo.Prison.PROHIBITION;
+        String info = PlaceholderAPI.setPlaceholders(player, prohibition);
 
         // 发送到玩家自己的聊天中
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', prefix + prohibition));
+        player.sendMessage(CommonUtils.translateColor(LanguageInfo.PREFIX + info));
     }
 
 }

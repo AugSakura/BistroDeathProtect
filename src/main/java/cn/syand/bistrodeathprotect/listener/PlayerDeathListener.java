@@ -1,12 +1,13 @@
 package cn.syand.bistrodeathprotect.listener;
 
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
+import cn.syand.bistrodeathprotect.config.PrisonList;
+import cn.syand.bistrodeathprotect.config.ProtectConfig;
 import cn.syand.bistrodeathprotect.runnable.DeathProtectTask;
 import cn.syand.bistrodeathprotect.runnable.PrisonTask;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -45,7 +46,18 @@ public class PlayerDeathListener implements Listener {
 
         // 玩家信息 和 配置信息
         Player player = (Player) entityDamageEvent.getEntity();
-        FileConfiguration config = this.plugin.getConfig();
+
+        // 判断是否是中毒伤害
+        if (entityDamageEvent.getCause().equals(EntityDamageEvent.DamageCause.POISON)) {
+            return;
+        }
+
+        // 判断玩家是否在小黑屋中
+        if (PrisonList.PRISON_LIST.contains(player.getName())) {
+            // 阻止玩家收到伤害
+            entityDamageEvent.setCancelled(true);
+            return;
+        }
 
         // 获取玩家当前血量
         double health = player.getHealth();
@@ -57,9 +69,15 @@ public class PlayerDeathListener implements Listener {
             return;
         }
 
-        // 判断玩家是否在黑名单中
-        if (this.isWorldInBlackList(player, config)) {
+        // 判断当前世界是否在黑名单中
+        if (this.isWorldInBlackList(player)) {
             // 使用原生死亡
+            return;
+        }
+
+        // 判断副手或当前手是否有不死图腾
+        if (player.getInventory().getItemInOffHand().getType().equals(Material.TOTEM_OF_UNDYING)
+                || player.getInventory().getItemInMainHand().getType().equals(Material.TOTEM_OF_UNDYING)) {
             return;
         }
 
@@ -73,7 +91,7 @@ public class PlayerDeathListener implements Listener {
         // 玩家死亡次数增加
         player.setStatistic(Statistic.DEATHS, player.getStatistic(Statistic.DEATHS) + 1);
         // 扣除玩家经验
-        this.deductExperience(player, config);
+        this.deductExperience(player);
         // 阻止玩家死亡
         entityDamageEvent.setCancelled(true);
         // 清除玩家药水效果
@@ -84,14 +102,14 @@ public class PlayerDeathListener implements Listener {
         player.setHealth(maxHealth);
         try {
             // 播放死亡声音
-            String deathSound = config.getString("setting.sound");
+            String deathSound = ProtectConfig.Setting.SOUND;
             player.playSound(player, Sound.valueOf(deathSound), 1.0F, 1.0F);
         } catch (Exception e) {
             throw new RuntimeException("音效不存在, 请在 config 中调整", e);
         }
 
         // 判断是否进入小黑屋
-        if (this.enterBlackRoom(player, config)) {
+        if (this.enterBlackRoom(player)) {
             return;
         }
 
@@ -105,20 +123,19 @@ public class PlayerDeathListener implements Listener {
      * 进入小黑屋
      *
      * @param player 玩家
-     * @param config 配置
      * @return 是否进入小黑屋
      */
-    public boolean enterBlackRoom(Player player, FileConfiguration config) {
+    public boolean enterBlackRoom(Player player) {
         // 判断是否需要进入小黑屋
-        if (!this.isEnterBlackRoom(player, config)) {
+        if (!this.isEnterBlackRoom(player)) {
             return Boolean.FALSE;
         }
 
         // 获取小黑屋世界
-        String worldName = config.getString("prison.location.world");
-        double x = config.getDouble("prison.location.x");
-        double y = config.getDouble("prison.location.y");
-        double z = config.getDouble("prison.location.z");
+        String worldName = ProtectConfig.Prison.Location.WORLD;
+        double x = ProtectConfig.Prison.Location.X;
+        double y = ProtectConfig.Prison.Location.Y;
+        double z = ProtectConfig.Prison.Location.Z;
         if (Objects.isNull(worldName)) {
             throw new RuntimeException("小黑屋世界不存在, 请在 config 中调整");
         }
@@ -130,7 +147,7 @@ public class PlayerDeathListener implements Listener {
         }
 
         // 获取倒计时时间
-        int time = config.getInt("prison.time");
+        int time = ProtectConfig.Prison.TIME;
 
         // 传送玩家到小黑屋
         player.teleport(new Location(world, x, y, z));
@@ -146,18 +163,17 @@ public class PlayerDeathListener implements Listener {
      * 判断是否需要进入小黑屋
      *
      * @param player 玩家
-     * @param config 配置
      */
-    private boolean isEnterBlackRoom(Player player, FileConfiguration config) {
+    private boolean isEnterBlackRoom(Player player) {
         // 判断是否开启小黑屋功能
-        if (!config.getBoolean("prison.enable")) {
+        if (!ProtectConfig.Prison.ENABLE) {
             return Boolean.FALSE;
         }
 
         // 获取当前玩家死亡次数
         int deaths = player.getStatistic(Statistic.DEATHS);
         // 判断死亡次数是否等于配置次数 死亡次数 % 配置次数 == 0
-        if (deaths % config.getInt("prison.death") != 0) {
+        if (deaths % ProtectConfig.Prison.DEATH != 0) {
             return Boolean.FALSE;
         }
 
@@ -169,16 +185,15 @@ public class PlayerDeathListener implements Listener {
      * 扣除玩家经验
      *
      * @param player 玩家
-     * @param config 配置
      */
-    private void deductExperience(Player player, FileConfiguration config) {
+    private void deductExperience(Player player) {
         // 获取开启是否扣除经验功能
-        if (!config.getBoolean("deathPenalty.enable")) {
+        if (!ProtectConfig.DeathPenalty.ENABLE) {
             return;
         }
 
         // 获取扣除经验值
-        double level = config.getDouble("deathPenalty.level");
+        double level = ProtectConfig.DeathPenalty.LEVEL;
         if (level < 0 || level > 1) {
             return;
         }
@@ -200,12 +215,11 @@ public class PlayerDeathListener implements Listener {
      * 否则返回 false
      *
      * @param player 玩家
-     * @param config 配置
      * @return 是否在黑名单中
      */
-    private boolean isWorldInBlackList(Player player, FileConfiguration config) {
+    private boolean isWorldInBlackList(Player player) {
         // 获取是否启用黑名单
-        if (!config.getBoolean("blackWorld.enable")) {
+        if (!ProtectConfig.BlackWorld.ENABLE) {
             return false;
         }
 
@@ -213,6 +227,6 @@ public class PlayerDeathListener implements Listener {
         String worldName = player.getWorld().getName();
 
         // 判断
-        return config.getStringList("blackWorld.worlds").contains(worldName);
+        return ProtectConfig.BlackWorld.WORLDS.contains(worldName);
     }
 }

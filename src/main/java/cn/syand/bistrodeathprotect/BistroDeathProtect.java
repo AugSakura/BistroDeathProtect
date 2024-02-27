@@ -1,18 +1,17 @@
 package cn.syand.bistrodeathprotect;
 
 import cn.syand.bistrodeathprotect.command.DeathProtectCommand;
+import cn.syand.bistrodeathprotect.config.LanguageInfo;
+import cn.syand.bistrodeathprotect.config.PrisonList;
+import cn.syand.bistrodeathprotect.config.ProtectConfig;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
 import cn.syand.bistrodeathprotect.listener.PlayerDeathListener;
 import cn.syand.bistrodeathprotect.listener.PlayerJoinListener;
 import cn.syand.bistrodeathprotect.listener.PlayerPrisonListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,41 +30,45 @@ public final class BistroDeathProtect extends JavaPlugin {
     public static BistroDeathProtect INSTANCE;
 
     /**
-     * 语言文件
+     * 插件配置
      */
-    public static File LANGUAGE_FILE;
+    private ProtectConfig protectConfig;
 
     /**
-     * 小黑屋列表文件
+     * 小黑屋列表
      */
-    public static File PRISONLIST_FILE;
+    private PrisonList prisonList;
+
+    /**
+     * 语言信息
+     */
+    private LanguageInfo languageInfo;
 
     public BistroDeathProtect() {
         INSTANCE = this;
     }
 
+    @Override
+    public void onLoad() {
+        // 初始化配置
+        this.protectConfig = new ProtectConfig(this);
+        this.prisonList = new PrisonList(this);
+        this.languageInfo = new LanguageInfo(this);
+    }
 
     @Override
     public void onEnable() {
-        // 保存配置
-        this.saveDefaultConfig();
+        // 加载配置
+        protectConfig.loadConfig();
 
-        // 语言文件地址
-        String languagePath = DeathProtectConstants.LANGUAGE_PATH + DeathProtectConstants.DEFAULT_LANGUAGE;
-        // 保存默认语言配置
-        File outFile = new File(this.getDataFolder(), languagePath);
-        if (!outFile.exists()) {
-            this.saveResource(languagePath, false);
-        }
+        // 加载小黑屋列表
+        prisonList.loadConfig();
 
-        // 保存已存在小黑屋中的玩家列表
-        File prisonListFile = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        if (!prisonListFile.exists()) {
-            this.saveResource(DeathProtectConstants.PRISON_PATH, false);
-        }
+        // 加载语言信息
+        languageInfo.loadConfig();
 
         // 注册命令
-        PluginCommand command = this.getCommand("bistrodeathprotect");
+        PluginCommand command = this.getCommand(DeathProtectConstants.BASE_COMMAND);
         if (Objects.nonNull(command)) {
             command.setExecutor(new DeathProtectCommand(this));
         }
@@ -76,10 +79,10 @@ public final class BistroDeathProtect extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(playerDeathListener, this);
 
         // 事件监听器: 玩家加入游戏
-        this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, playerDeathListener), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(playerDeathListener), this);
 
         // 事件监听器: 小黑屋
-        this.getServer().getPluginManager().registerEvents(new PlayerPrisonListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerPrisonListener(), this);
 
         // 打印插件信息
         Bukkit.getConsoleSender().sendMessage("§aBistroDeathProtect §f插件已加载");
@@ -90,110 +93,5 @@ public final class BistroDeathProtect extends JavaPlugin {
     public void onDisable() {
         // 打印插件信息
         Bukkit.getConsoleSender().sendMessage("§aBistroDeathProtect §f插件已卸载");
-    }
-
-    /**
-     * 获取语言配置
-     *
-     * @return 语言配置
-     */
-    public YamlConfiguration getLanguageConfig() {
-        FileConfiguration config = this.getConfig();
-        String language = config.getString("setting.language");
-
-        // 语言文件 和 语言资源
-        if (Objects.isNull(LANGUAGE_FILE)) {
-            LANGUAGE_FILE = new File(this.getDataFolder(), DeathProtectConstants.LANGUAGE_PATH + language + DeathProtectConstants.FILE_SUFFIX);
-        }
-        return YamlConfiguration.loadConfiguration(LANGUAGE_FILE);
-    }
-
-    /**
-     * 清空语言文件
-     */
-    public void clearLanguageFile() {
-        LANGUAGE_FILE = null;
-    }
-
-    /**
-     * 获取小黑屋中的玩家列表
-     *
-     * @return 小黑屋中的玩家列表
-     */
-    public List<String> getPrisonList() {
-        // 获取配置
-        if (Objects.isNull(PRISONLIST_FILE)) {
-            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        }
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
-        return configuration.getStringList("player");
-    }
-
-    /**
-     * 将玩家添加到小黑屋列表中
-     *
-     * @param name 玩家名称
-     */
-    public void addPrisonList(String name) {
-        // 获取配置
-        if (Objects.isNull(PRISONLIST_FILE)) {
-            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        }
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
-
-        // 获取玩家列表
-        List<String> player = configuration.getStringList("player");
-        // 判断是否存在
-        if (player.contains(name)) {
-            return;
-        }
-
-        // 不存在则添加玩家
-        player.add(name);
-
-        // 保存
-        configuration.set("player", player);
-        try {
-            configuration.save(PRISONLIST_FILE);
-
-            // 清空缓存
-            PRISONLIST_FILE = null;
-        } catch (Exception e) {
-            throw new RuntimeException("保存小黑屋列表失败");
-        }
-    }
-
-    /**
-     * 将玩家从小黑屋列表中移除
-     *
-     * @param name 玩家名称
-     */
-    public void removePrisonList(String name) {
-        // 获取配置
-        if (Objects.isNull(PRISONLIST_FILE)) {
-            PRISONLIST_FILE = new File(this.getDataFolder(), DeathProtectConstants.PRISON_PATH);
-        }
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(PRISONLIST_FILE);
-
-        // 获取玩家列表
-        List<String> player = configuration.getStringList("player");
-        // 判断是否存在
-        if (!player.contains(name)) {
-            return;
-        }
-
-        // 存在则移除玩家
-        player.removeIf(playerName -> playerName.equals(name));
-
-        // 保存
-        configuration.set("player", player);
-        try {
-            configuration.save(PRISONLIST_FILE);
-
-            // 清空缓存
-            PRISONLIST_FILE = null;
-        } catch (Exception e) {
-            throw new RuntimeException("保存小黑屋列表失败");
-        }
     }
 }

@@ -1,13 +1,11 @@
 package cn.syand.bistrodeathprotect.listener;
 
-import cn.syand.bistrodeathprotect.BistroDeathProtect;
-import org.bukkit.configuration.file.FileConfiguration;
+import cn.syand.bistrodeathprotect.config.PrisonList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -21,17 +19,11 @@ import java.util.Objects;
 public class PlayerJoinListener implements Listener {
 
     /**
-     * 死亡保护 插件实例
-     */
-    private final BistroDeathProtect plugin;
-
-    /**
      * 玩家死亡事件监听器
      */
     private final PlayerDeathListener playerDeathListener;
 
-    public PlayerJoinListener(BistroDeathProtect bistroDeathProtect, PlayerDeathListener playerDeathListener) {
-        this.plugin = bistroDeathProtect;
+    public PlayerJoinListener(PlayerDeathListener playerDeathListener) {
         this.playerDeathListener = playerDeathListener;
     }
 
@@ -42,24 +34,22 @@ public class PlayerJoinListener implements Listener {
             return;
         }
 
-        // 获取当前在小黑屋中的玩家列表
-        List<String> prisonList = this.plugin.getPrisonList();
-        if (prisonList.isEmpty()) {
+        // 判断小黑屋列表是否为空
+        if (PrisonList.PRISON_LIST.isEmpty()) {
             return;
         }
 
         // 获取玩家名称 和 配置
-        FileConfiguration config = this.plugin.getConfig();
         Player player = event.getPlayer();
         String name = player.getName();
 
-        // 判断是否在小黑屋中 区分大小写
-        boolean isPrison = prisonList.contains(name);
+        // 判断是否在小黑屋列表中 区分大小写
+        boolean isPrison = PrisonList.PRISON_LIST.contains(name);
         if (!isPrison) {
             return;
         }
 
         // 如果在小黑屋中 那么开始执行小黑屋中的逻辑
-        playerDeathListener.enterBlackRoom(player, config);
+        playerDeathListener.enterBlackRoom(player);
     }
 }

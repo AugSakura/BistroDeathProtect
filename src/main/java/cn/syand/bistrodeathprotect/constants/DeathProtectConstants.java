@@ -44,4 +44,14 @@ public class DeathProtectConstants {
      * 小黑屋中的玩家列表文件路径
      */
     public static final String PRISON_PATH = "prisonList.yml";
+
+    /**
+     * 颜色符号
+     */
+    public static final char COLOR_SYMBOL = '&';
+
+    /**
+     * 基础指令
+     */
+    public static final String BASE_COMMAND = "bistrodeathprotect";
 }

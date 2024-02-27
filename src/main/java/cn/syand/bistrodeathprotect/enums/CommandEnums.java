@@ -20,22 +20,27 @@ public enum CommandEnums {
     /**
      * 重载命令
      */
-    RELOAD("reload"),
+    RELOAD("reload", "bistro.death.command.reload"),
 
     /**
      * 设置小黑屋地点
      */
-    SET_PRISON("setPrison"),
+    SET_PRISON("setPrison", "bistro.death.command.setPrison"),
 
     /**
      * 未知
      */
-    UNKNOWN("unknown");
+    UNKNOWN("unknown", "");
 
     /**
      * 命令
      */
     private final String command;
+
+    /**
+     * 权限
+     */
+    private final String permission;
 
     /**
      * 获取命令
@@ -44,6 +49,13 @@ public enum CommandEnums {
      */
     public String command() {
         return command;
+    }
+
+    /**
+     * 获取权限
+     */
+    public String permission() {
+        return permission;
     }
 
     /**

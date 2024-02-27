@@ -1,11 +1,12 @@
 package cn.syand.bistrodeathprotect.runnable;
 
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
+import cn.syand.bistrodeathprotect.config.LanguageInfo;
+import cn.syand.bistrodeathprotect.config.ProtectConfig;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
+import cn.syand.bistrodeathprotect.utils.CommonUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -41,7 +42,7 @@ public class DeathProtectTask extends BukkitRunnable {
         this.player = player;
 
         // 获取死亡保护时间
-        this.time = BistroDeathProtect.INSTANCE.getConfig().getInt("setting.time", 5);
+        this.time = ProtectConfig.Setting.TIME;
     }
 
     /**
@@ -70,15 +71,10 @@ public class DeathProtectTask extends BukkitRunnable {
             return;
         }
 
-        // 获取语言配置
-        YamlConfiguration languageConfig = this.plugin.getLanguageConfig();
         // 获取标题
-        String title = languageConfig.getString("death.title");
+        String title = LanguageInfo.Death.TITLE;
         // 获取副标题
-        String subtitle = languageConfig.getString("death.subtitle");
-        if (Objects.isNull(title) || Objects.isNull(subtitle)) {
-            throw new RuntimeException("title 或 subtitle 设置为空");
-        }
+        String subtitle = LanguageInfo.Death.SUBTITLE;
 
         // 时间减少
         int timer = this.time;
@@ -94,8 +90,8 @@ public class DeathProtectTask extends BukkitRunnable {
 
         // 发送标题
         player.sendTitle(
-                ChatColor.translateAlternateColorCodes('&', title),
-                ChatColor.translateAlternateColorCodes('&', subtitle),
+                CommonUtils.translateColor(title),
+                CommonUtils.translateColor(subtitle),
                 10,
                 20,
                 10

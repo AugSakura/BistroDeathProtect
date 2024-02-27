@@ -1,17 +1,17 @@
 package cn.syand.bistrodeathprotect.runnable;
 
 import cn.syand.bistrodeathprotect.BistroDeathProtect;
+import cn.syand.bistrodeathprotect.config.LanguageInfo;
+import cn.syand.bistrodeathprotect.config.PrisonList;
+import cn.syand.bistrodeathprotect.config.ProtectConfig;
 import cn.syand.bistrodeathprotect.constants.DeathProtectConstants;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Server;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.List;
 
 /**
  * PrisonTask
@@ -38,24 +38,18 @@ public class PrisonTask extends BukkitRunnable {
      */
     private int time;
 
-    /**
-     * 小黑屋结束后执行的命令
-     */
-    private final List<String> commands;
-
     public PrisonTask(BistroDeathProtect plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
-        this.commands = plugin.getConfig().getStringList("prison.commands");
-
-        // 将玩家添加到小黑屋列表中
-        plugin.addPrisonList(player.getName());
 
         // 设置玩家游戏模式 冒险模式
         player.setGameMode(GameMode.ADVENTURE);
 
+        // 将玩家添加到小黑屋列表中
+        PrisonList.addPlayer(player.getName());
+
         // 获取死亡保护时间
-        this.time = BistroDeathProtect.INSTANCE.getConfig().getInt("prison.time", 30);
+        this.time = ProtectConfig.Prison.TIME;
     }
 
     /**
@@ -83,12 +77,10 @@ public class PrisonTask extends BukkitRunnable {
             return;
         }
 
-        // 获取语言配置
-        YamlConfiguration languageConfig = this.plugin.getLanguageConfig();
         // 获取标题
-        String title = languageConfig.getString("prison.title");
+        String title = LanguageInfo.Prison.TITLE;
         // 获取副标题
-        String subtitle = languageConfig.getString("prison.subtitle");
+        String subtitle = LanguageInfo.Prison.SUBTITLE;
         if (title == null || subtitle == null) {
             throw new RuntimeException("title 或 subtitle 设置为空");
         }
@@ -122,8 +114,8 @@ public class PrisonTask extends BukkitRunnable {
         // 执行小黑屋结束后的命令
         Server server = this.plugin.getServer();
         try {
-            if (!commands.isEmpty()) {
-                commands.forEach(command -> server.dispatchCommand(
+            if (!ProtectConfig.Prison.COMMANDS.isEmpty()) {
+                ProtectConfig.Prison.COMMANDS.forEach(command -> server.dispatchCommand(
                         server.getConsoleSender(),
                         PlaceholderAPI.setPlaceholders(this.player, command)
                 ));
@@ -132,8 +124,8 @@ public class PrisonTask extends BukkitRunnable {
             throw new RuntimeException("小黑屋结束后的命令执行失败", e);
         }
 
-        // 将玩家添加到小黑屋列表中
-        plugin.removePrisonList(player.getName());
+        // 将玩家从小黑屋列表中移除
+        PrisonList.removePlayer(player.getName());
 
         // 取消失明效果
         this.player.removePotionEffect(PotionEffectType.BLINDNESS);
