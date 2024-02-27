@@ -47,15 +47,15 @@ public class PlayerDeathListener implements Listener {
         // 玩家信息 和 配置信息
         Player player = (Player) entityDamageEvent.getEntity();
 
-        // 判断是否是中毒伤害
-        if (entityDamageEvent.getCause().equals(EntityDamageEvent.DamageCause.POISON)) {
-            return;
-        }
-
         // 判断玩家是否在小黑屋中
         if (PrisonList.PRISON_LIST.contains(player.getName())) {
             // 阻止玩家收到伤害
             entityDamageEvent.setCancelled(true);
+            return;
+        }
+        
+        // 判断是否是中毒伤害
+        if (entityDamageEvent.getCause().equals(EntityDamageEvent.DamageCause.POISON)) {
             return;
         }
 
@@ -69,15 +69,15 @@ public class PlayerDeathListener implements Listener {
             return;
         }
 
-        // 判断当前世界是否在黑名单中
-        if (this.isWorldInBlackList(player)) {
-            // 使用原生死亡
-            return;
-        }
-
         // 判断副手或当前手是否有不死图腾
         if (player.getInventory().getItemInOffHand().getType().equals(Material.TOTEM_OF_UNDYING)
                 || player.getInventory().getItemInMainHand().getType().equals(Material.TOTEM_OF_UNDYING)) {
+            return;
+        }
+
+        // 判断当前世界是否在黑名单中
+        if (this.isWorldInBlackList(player)) {
+            // 使用原生死亡
             return;
         }
 
