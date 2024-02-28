@@ -43,6 +43,9 @@ public class DeathProtectTask extends BukkitRunnable {
 
         // 获取死亡保护时间
         this.time = ProtectConfig.Setting.TIME;
+
+        // 清空玩家标题
+        player.resetTitle();
     }
 
     /**
